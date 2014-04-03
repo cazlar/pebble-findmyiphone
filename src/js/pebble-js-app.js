@@ -11,13 +11,13 @@ function getPartition() {
       productType: 'iPad1,1'
     }
   };
-  post('fmipservice/device/'+localStorage.email+'/initClient', body, function(req) {
+  post('fmipservice/device/'+localStorage.getItem('email')+'/initClient', body, function(req) {
     localStorage.setItem('partition', req.getResponseHeader('X-Apple-MMe-Host'));
   });
 }
 
 function updateDevices() {
-  if (localStorage.partition === null) {
+  if (localStorage.getItem('partition') === null) {
     getPartition();
   }
 
@@ -33,7 +33,7 @@ function updateDevices() {
       productType: 'iPad1,1'
     }
   };
-  post('fmipservice/device/'+localStorage.email+'/initClient', body, function(req) {
+  post('fmipservice/device/'+localStorage.getItem('email')+'/initClient', body, function(req) {
     var res = JSON.parse(req.responseText);
     res.content.forEach(function(element, index, array) {
       Pebble.sendAppMessage({'index': index, 'id': element.id, 'name': element.name});
@@ -76,12 +76,12 @@ function playSound(id) {
     device: id,
     subject: 'Find My iPhone Alert'
   };
-  post('fmipservice/device/'+localStorage.email+'/playSound', body, function(req) {});
+  post('fmipservice/device/'+localStorage.getItem('email')+'/playSound', body, function(req) {});
 }
 
 function post(path, body, callback) {
   var req = new XMLHttpRequest();
-  var url = localStorage.partition !== null ? 'https://'+localStorage.partition+'/' : 'https://fmipmobile.icloud.com/';
+  var url = localStorage.getItem('partition') !== null ? 'https://'+localStorage.getItem('partition')+'/' : 'https://fmipmobile.icloud.com/';
   req.open('POST', url + path, true);
 
   req.setRequestHeader('Content-type', 'application/json; charset=utf-8');
@@ -93,7 +93,7 @@ function post(path, body, callback) {
   req.setRequestHeader('X-Client-UUID', '0cf3dc501ff812adb0b202baed4f37274b210853');
   req.setRequestHeader('Accept-Language', 'en-us');
   req.setRequestHeader('Connection', 'keep-alive');
-  req.setRequestHeader('Authorization', 'Basic '+encode64(localStorage.email+':'+localStorage.password));
+  req.setRequestHeader('Authorization', 'Basic '+encode64(localStorage.getItem('email')+':'+localStorage.getItem('password')));
 
   req.send(JSON.stringify(body));
   req.onload = function(e) {
@@ -123,7 +123,7 @@ function encode64(input) {
 }
 
 Pebble.addEventListener('ready', function(e) {
-  if (localStorage.email === null && localStorage.password === null) {
+  if (localStorage.getItem('email') === null && localStorage.getItem('password') === null) {
     updateDevices();
   }
 });
